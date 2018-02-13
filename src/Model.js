@@ -201,13 +201,16 @@ export default class Model extends Base {
   @action
   fetch (options: { data?: {} } = {}): Promise<*> {
     const { abort, promise } = apiClient().get(this.url(), options)
+    const request = this.withRequest('fetching', promise, abort)
 
-    return this.withRequest('fetching', promise, abort)
+    request
       .then(data => {
         this.set(data)
         this.commitChanges()
         return data
       })
+
+    return request
   }
 
   /**
@@ -247,8 +250,9 @@ export default class Model extends Base {
     }
 
     const { promise, abort } = apiClient()[method](this.url(), data)
+    const request = this.withRequest(['saving', label], promise, abort)
 
-    return this.withRequest(['saving', label], promise, abort)
+    request
       .then(data => {
         const changes = getChangesBetween(currentAttributes, this.attributes.toJS())
 
@@ -267,6 +271,8 @@ export default class Model extends Base {
         this.set(currentAttributes)
         throw error
       })
+
+    return request
   }
 
   /**
@@ -293,7 +299,9 @@ export default class Model extends Base {
       collection.remove(this)
     }
 
-    return this.withRequest('destroying', promise, abort)
+    const request = this.withRequest('destroying', promise, abort)
+
+    request
       .then(data => {
         if (!optimistic && collection) {
           collection.remove(this)
@@ -306,6 +314,8 @@ export default class Model extends Base {
         }
         throw error
       })
+
+    return request
   }
 }
 

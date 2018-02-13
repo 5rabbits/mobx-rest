@@ -254,7 +254,9 @@ export default class Collection extends Base {
       this.add(model)
     }
 
-    return this.withRequest('creating', promise)
+    const request = this.withRequest('creating', promise)
+
+    request
       .then(response => {
         if (!optimistic) {
           this.add(model)
@@ -267,6 +269,8 @@ export default class Collection extends Base {
         }
         throw error
       })
+
+    return request
   }
 
   /**
@@ -279,11 +283,14 @@ export default class Collection extends Base {
   @action
   fetch (options: SetOptions = {}): Promise<void> {
     const { abort, promise } = apiClient().get(this.url(), options)
+    const request = this.withRequest('fetching', promise, abort)
 
-    return this.withRequest('fetching', promise, abort)
+    request
       .then(data => {
         this.set(data, options)
         return data
       })
+
+    return request
   }
 }

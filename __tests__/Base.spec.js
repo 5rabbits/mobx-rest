@@ -1,4 +1,5 @@
 import Base from '../src/Base'
+import Request from '../src/Request'
 import ErrorObject from '../src/ErrorObject'
 import apiClient from '../src/apiClient'
 import MockApi from './mocks/api'
@@ -19,10 +20,10 @@ describe(Base, () => {
   })
 
   describe('withRequest(labels, promise, abort)', () => {
-    it('returns a Request promise', () => {
+    it('returns a Request object', () => {
       const request = model.withRequest('fetching', Promise.resolve())
 
-      expect(request).toBeInstanceOf(Promise)
+      expect(request).toBeInstanceOf(Request)
     })
 
     it('tracks the request while is pending', () => {
@@ -128,8 +129,8 @@ describe(Base, () => {
       })
     })
 
-    it('returns a Request promise', () => {
-      expect(request).toBeInstanceOf(Promise)
+    it('returns a Request object', () => {
+      expect(request).toBeInstanceOf(Request)
     })
 
     it('sends a request using the endpoint suffix', () => {
