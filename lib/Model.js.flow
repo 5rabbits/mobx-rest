@@ -8,7 +8,7 @@ import {
   runInAction
 } from 'mobx'
 import Collection from './Collection'
-import { uniqueId, union } from 'lodash'
+import { uniqueId, union, isEqual } from 'lodash'
 import apiClient from './apiClient'
 import Base from './Base'
 import Request from './Request'
@@ -327,7 +327,7 @@ const getChangedAttributesBetween = (source: {}, target: {}): Array<string> => {
     Object.keys(target)
   )
 
-  return keys.filter(key => source[key] !== target[key])
+  return keys.filter(key => !isEqual(source[key], target[key]))
 }
 
 const getChangesBetween = (source: {}, target: {}): { [string]: mixed } => {
