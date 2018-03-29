@@ -142,7 +142,7 @@ export default class Model extends Base {
    */
   @computed
   get changedAttributes (): Array<string> {
-    return getChangedAttributesBetween(this.committedAttributes.toJS(), this.attributes.toJS())
+    return getChangedAttributesBetween(toJS(this.committedAttributes), toJS(this.attributes))
   }
 
   /**
@@ -150,7 +150,7 @@ export default class Model extends Base {
    */
   @computed
   get changes (): { [string]: mixed } {
-    return getChangesBetween(this.committedAttributes.toJS(), this.attributes.toJS())
+    return getChangesBetween(toJS(this.committedAttributes), toJS(this.attributes))
   }
 
   /**
@@ -258,7 +258,7 @@ export default class Model extends Base {
 
     promise
       .then(data => {
-        const changes = getChangesBetween(currentAttributes, this.attributes.toJS())
+        const changes = getChangesBetween(currentAttributes, toJS(this.attributes))
 
         runInAction('save success', () => {
           this.set(data)
