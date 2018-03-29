@@ -8,7 +8,7 @@ import {
   runInAction
 } from 'mobx'
 import Collection from './Collection'
-import { uniqueId, union, isEqual } from 'lodash'
+import { uniqueId, union, isEqual, isPlainObject } from 'lodash'
 import apiClient from './apiClient'
 import Base from './Base'
 import Request from './Request'
@@ -334,7 +334,9 @@ const getChangesBetween = (source: {}, target: {}): { [string]: mixed } => {
   const changes = {}
 
   getChangedAttributesBetween(source, target).forEach(key => {
-    changes[key] = target[key]
+    changes[key] = isPlainObject(source[key]) && isPlainObject(target[key])
+      ? getChangesBetween(source[key], target[key])
+      : target[key]
   })
 
   return changes
