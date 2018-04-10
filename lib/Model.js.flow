@@ -220,8 +220,8 @@ export default class Model extends Base {
    * Merges old attributes with new ones.
    * By default it doesn't merge arrays.
    */
-  mergeAttributes (oldAttributes: {}, newAttributes: {}): {} {
-    return deepmerge(oldAttributes, newAttributes, {
+  applyPatchChanges (oldAttributes: {}, changes: {}): {} {
+    return deepmerge(oldAttributes, changes, {
       arrayMerge: dontMergeArrays
     })
   }
@@ -249,10 +249,8 @@ export default class Model extends Base {
       data = attributes
     } else if (patch) {
       data = this.changes
-    } else if (attributes) {
-      data = this.mergeAttributes(currentAttributes, attributes)
     } else {
-      data = currentAttributes
+      data = { ...currentAttributes, ...attributes }
     }
 
     let method
@@ -267,7 +265,7 @@ export default class Model extends Base {
 
     if (optimistic && attributes) {
       this.set(patch
-        ? this.mergeAttributes(currentAttributes, attributes)
+        ? this.applyPatchChanges(currentAttributes, attributes)
         : attributes
       )
     }
@@ -283,7 +281,7 @@ export default class Model extends Base {
           this.commitChanges()
 
           if (keepChanges) {
-            this.set(this.mergeAttributes(data, changes))
+            this.set(this.applyPatchChanges(data, changes))
           }
         })
 
