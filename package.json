@@ -1,10 +1,13 @@
 {
-  "name": "mobx-rest",
-  "version": "2.2.5",
+  "name": "@5rabbits/mobx-rest",
+  "version": "3.0.0",
   "description": "REST conventions for mobx.",
   "repository": {
     "type": "git",
     "url": "git@github.com:masylum/mobx-rest.git"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "jest": {
