@@ -156,7 +156,7 @@ export default class Collection extends Base {
       data = [data]
     }
 
-    this.models.push(...data.map(this.build))
+    this.models.push(...data.map(attributes => this.build(attributes)))
   }
 
   /**
@@ -164,7 +164,7 @@ export default class Collection extends Base {
    */
   @action
   reset (data: Array<{ [key: string]: any } | Model>): void {
-    this.models.replace(data.map(this.build))
+    this.models.replace(data.map(attributes => this.build(attributes)))
   }
 
   /**
@@ -219,7 +219,7 @@ export default class Collection extends Base {
   /**
    * Creates a new model instance with the given attributes
    */
-  build = (attributes: { [key: string]: any } = {}): Model => {
+  build (attributes: { [key: string]: any } = {}): Model {
     if (attributes instanceof Model) {
       attributes.collection = this
       return attributes
