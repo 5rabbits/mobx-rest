@@ -211,7 +211,14 @@ export default class Collection extends Base {
     resources.forEach(resource => {
       const model = this.get(resource.id)
 
-      if (model && change) model.set(resource)
+      if (model && change) {
+        model.set(
+          resource instanceof Model
+            ? resource.toJS()
+            : resource
+        )
+      }
+
       if (!model && add) this.add([resource])
     })
   }
