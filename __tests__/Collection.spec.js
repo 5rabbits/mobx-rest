@@ -375,6 +375,22 @@ describe(Collection, () => {
             { id: 2, phone: '9999' }
           ])
         })
+
+        it('allows to pass model instances', () => {
+          collection.reset([
+            { id: 1, phone: '1234' },
+            { id: 2, phone: '5678' }
+          ])
+          collection.set(
+            [new Model({ id: 1, phone: '8888' }), { id: 2, phone: '9999' }],
+            { add: false, change: true, remove: false }
+          )
+
+          expect(collection.toJS()).toEqual([
+            { id: 1, phone: '8888' },
+            { id: 2, phone: '9999' }
+          ])
+        })
       })
 
       describe('if change = false', () => {
