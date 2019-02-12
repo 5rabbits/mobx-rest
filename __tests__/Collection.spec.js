@@ -275,9 +275,9 @@ describe(Collection, () => {
 
       collection.reset([model])
 
-      expect(model.collection).toBe(collection)
+      expect(model.collections).toEqual([collection])
       collection.remove(1)
-      expect(model.collection).toBeUndefined()
+      expect(model.collections).toEqual([])
     })
 
     describe('if the id is not registered', () => {
@@ -316,7 +316,7 @@ describe(Collection, () => {
 
         expect(collection.length).toBe(1)
         expect(collection.at(0).id).toBe(2)
-        expect(model.collection).toBeUndefined()
+        expect(model.collections).toEqual([])
       })
     })
 
@@ -460,14 +460,6 @@ describe(Collection, () => {
         const model = new Model()
 
         expect(collection.build(model)).toBe(model)
-      })
-
-      it('assigns the collection to the model', () => {
-        const model = new Model()
-
-        collection.build(model)
-
-        expect(model.collection).toBe(collection)
       })
     })
 

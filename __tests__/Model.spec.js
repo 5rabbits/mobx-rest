@@ -90,12 +90,12 @@ describe(Model, () => {
     })
 
     describe('if the model belongs to a collection and urlRoot is not defined', () => {
-      it('uses the collection url as root', () => {
+      it('uses the first collection url as root', () => {
         const model = new Model({ id: 2 })
         const collection = new Collection()
 
         collection.url = () => '/different-resources'
-        model.collection = collection
+        collection.add(model)
 
         expect(model.url()).toBe('/different-resources/2')
       })
@@ -950,18 +950,22 @@ describe(Model, () => {
       })
 
       describe('if belongs to a collection', () => {
-        let collection
+        let collection1
+        let collection2
 
         beforeEach(() => {
-          collection = new Collection()
-          model.collection = collection
-          collection.models.push(model)
+          collection1 = new Collection()
+          collection2 = new Collection()
+          collection1.add(model)
+          collection2.add(model)
         })
 
-        it('removes itself from the collection', () => {
-          expect(collection.length).toBe(1)
+        it('removes itself from each collection', () => {
+          expect(collection1.length).toBe(1)
+          expect(collection2.length).toBe(1)
           model.destroy()
-          expect(collection.length).toBe(0)
+          expect(collection1.length).toBe(0)
+          expect(collection2.length).toBe(0)
         })
       })
     })
@@ -978,44 +982,52 @@ describe(Model, () => {
       })
 
       describe('if optimistic and belongs to a collection', () => {
-        let collection
+        let collection1
+        let collection2
 
         beforeEach(() => {
-          collection = new Collection()
-          model.collection = collection
-          collection.models.push(model)
+          collection1 = new Collection()
+          collection2 = new Collection()
+          collection1.add(model)
+          collection2.add(model)
         })
 
-        it('immediately removes itself from the collection', () => {
-          expect(collection.length).toBe(1)
+        it('immediately removes itself from each collection', () => {
+          expect(collection1.length).toBe(1)
+          expect(collection2.length).toBe(1)
           model.destroy({ optimistic: true })
-          expect(collection.length).toBe(0)
+          expect(collection1.length).toBe(0)
+          expect(collection2.length).toBe(0)
         })
       })
 
       describe('if the request succeds', () => {
         describe('if not optimistic and belongs to a collection', () => {
-          it('removes itself from the collection', async () => {
-            const collection = new Collection()
+          it('removes itself from each collection', async () => {
+            const collection1 = new Collection()
+            const collection2 = new Collection()
 
-            model.collection = collection
-            collection.models.push(model)
+            collection1.add(model)
+            collection2.add(model)
 
             const promise = model.destroy({ optimistic: false })
 
-            expect(collection.length).toBe(1)
+            expect(collection1.length).toBe(1)
+            expect(collection2.length).toBe(1)
 
             MockApi.resolvePromise({})
             await promise
 
-            expect(collection.length).toBe(0)
+            expect(collection1.length).toBe(0)
+            expect(collection2.length).toBe(0)
           })
         })
 
         describe('if optimistic or don\'t belongs to a collection', () => {
           it('not throws', async () => {
-            model.collection = new Collection()
-            model.collection.models.push(model)
+            const collection = new Collection()
+
+            collection.add(model)
 
             const promise = model.destroy({ optimistic: true })
 
@@ -1041,8 +1053,7 @@ describe(Model, () => {
           it('adds itself to the collection again', async () => {
             const collection = new Collection()
 
-            model.collection = collection
-            collection.models.push(model)
+            collection.add(model)
 
             const promise = model.destroy({ optimistic: true })
 
