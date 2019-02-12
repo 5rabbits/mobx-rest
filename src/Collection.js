@@ -156,7 +156,21 @@ export default class Collection extends Base {
       data = [data]
     }
 
-    this.models.push(...data.map(attributes => this.build(attributes)))
+    this.models.push(...data.map(attributes => {
+      const model = this.build(attributes)
+
+      this.addToModelCollections(model)
+
+      return model
+    }))
+  }
+
+  addToModelCollections (model: Model) {
+    const index = model.collections.indexOf(this)
+
+    if (index === -1) {
+      model.collections.push(this)
+    }
   }
 
   /**
@@ -164,7 +178,13 @@ export default class Collection extends Base {
    */
   @action
   reset (data: Array<{ [key: string]: any } | Model>): void {
-    this.models.replace(data.map(attributes => this.build(attributes)))
+    this.models.replace(data.map(attributes => {
+      const model = this.build(attributes)
+
+      this.addToModelCollections(model)
+
+      return model
+    }))
   }
 
   /**
@@ -179,7 +199,7 @@ export default class Collection extends Base {
     ids.forEach(id => {
       let model
 
-      if (id instanceof Model && id.collection === this) {
+      if (id instanceof Model && id.collections.indexOf(this) !== -1) {
         model = id
       } else if (typeof id === 'number') {
         model = this.get(id)
@@ -188,7 +208,7 @@ export default class Collection extends Base {
       if (!model) return
 
       this.models.splice(this.models.indexOf(model), 1)
-      model.collection = undefined
+      model.collections.splice(model.collections.indexOf(this), 1)
     })
   }
 
@@ -228,15 +248,12 @@ export default class Collection extends Base {
    */
   build (attributes: { [key: string]: any } = {}): Model {
     if (attributes instanceof Model) {
-      attributes.collection = this
       return attributes
     }
 
     const ModelClass = this.model(attributes)
-    const model = new ModelClass(attributes)
-    model.collection = this
 
-    return model
+    return new ModelClass(attributes)
   }
 
   /**
@@ -251,6 +268,9 @@ export default class Collection extends Base {
     { optimistic = true }: CreateOptions = {}
   ): Request {
     const model = this.build(attributesOrModel)
+
+    this.addToModelCollections(model)
+
     const { abort, promise } = model.save()
 
     if (optimistic) {
