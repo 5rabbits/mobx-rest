@@ -29,7 +29,7 @@ export default class Model extends Base {
   committedAttributes: ObservableMap = observable.map()
 
   optimisticId: OptimisticId = uniqueId('i_')
-  collection: ?Collection = null
+  collections: Collection[] = []
 
   constructor (attributes: { [key: string]: any } = {}) {
     super()
@@ -77,8 +77,8 @@ export default class Model extends Base {
   url (): string {
     let urlRoot = this.urlRoot()
 
-    if (!urlRoot && this.collection) {
-      urlRoot = this.collection.url()
+    if (!urlRoot && this.collections.length > 0) {
+      urlRoot = this.collections[0].url()
     }
 
     if (!urlRoot) {
@@ -302,11 +302,12 @@ export default class Model extends Base {
    */
   @action
   destroy ({ optimistic = true, ...otherOptions }: DestroyOptions = {}): Request {
-    const collection = this.collection
+    const collections = [...this.collections]
 
-    if (this.isNew && collection) {
-      collection.remove(this)
-      return new Request(Promise.resolve())
+    if (this.isNew || optimistic) {
+      collections.forEach(collection => {
+        collection.remove(this)
+      })
     }
 
     if (this.isNew) {
@@ -315,20 +316,20 @@ export default class Model extends Base {
 
     const { promise, abort } = apiClient().del(this.url(), otherOptions)
 
-    if (optimistic && collection) {
-      collection.remove(this)
-    }
-
     promise
       .then(data => {
-        if (!optimistic && collection) {
-          collection.remove(this)
+        if (!optimistic) {
+          collections.forEach(collection => {
+            collection.remove(this)
+          })
         }
         return data
       })
       .catch(error => {
-        if (optimistic && collection) {
-          collection.add(this)
+        if (optimistic) {
+          collections.forEach(collection => {
+            collection.add(this)
+          })
         }
         throw error
       })
